@@ -1,5 +1,4 @@
-from datetime import datetime as dt
-from src import app_logger, twitter, codes
+from src import app_logger, twitter
 
 log = app_logger.get_logger(__name__)
 
@@ -7,26 +6,17 @@ log = app_logger.get_logger(__name__)
 def main():
     log.info('Starting program.')
 
-    tweets = twitter.get_searched_tweets(
-        target='food',
-        since_id=12345678
-    )
-    now_epoch = int(dt.now().timestamp())
-    code = codes.Code(now_epoch)
+    api = twitter.get_api()
 
-    for tweet in tweets:
-        id = tweet._json['id']
-        created_at = tweet._json['created_at']
-        epoch = int(
-            dt.strptime(
-                created_at, '%a %b %d %H:%M:%S +0000 %Y'
-            ).timestamp()
-        )
+    # Así te traes los retweets de un usuario, por ejemplo los 10 últimos.
+    twitter.get_user_timeline(api, 'WatchMeNow', 10)
 
-        print(f'id: {id}, created_at: {created_at}, epoch: {epoch}')
-
-        code.encode('Hola')
-        print(code.decode(epoch))
+    # Y así retuiteas usando el status, no el ID.
+    twitter.retweet(api, '16846')
+    twitter.retweet(api, '993643')
+    twitter.retweet(api, '540600022')
+    twitter.retweet(api, '153263220755402754')
+    twitter.retweet(api, '164497520108646401')
 
     log.info('Finishing program.')
 

@@ -1,11 +1,12 @@
 import tweepy
 
+from datetime import datetime as dt
 from src import config, app_logger
 
 log = app_logger.get_logger(__name__)
 
 
-def _get_api():
+def get_api():
     """ Returns Twitter API object. """
 
     auth = tweepy.OAuthHandler(
@@ -23,10 +24,11 @@ def _get_api():
     )
 
 
-def get_searched_tweets(target, since_id):
+def search_tweets(api, target):
     """ Returns a collection of relevant Tweets matching a specified query.
 
     Attributes:
+        :api (Obj): Tweepy API client object.
         :target (str):      A UTF-8, URL-encoded search query of 500 characters
                             max including  operators. Queries  may additionally
                             be limited by complexity.
@@ -41,13 +43,53 @@ def get_searched_tweets(target, since_id):
     log.info(f'Looking for tweets with target "{target}".')
 
     # Doc: https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/api-reference/get-search-tweets  # noqa: E501
-    return [
-        tweet for tweet in tweepy.Cursor(
-            _get_api().search,
-            q=target,
-            lang='en',
-            result_type='popular',
-            since_id=since_id,
-            include_entities=False
-        ).items()
-    ]
+    for tweet in tweepy.Cursor(
+        api.search,
+        q=target,
+        lang='en',
+        result_type='recent',
+        include_entities=False
+    ).items(1):
+        id = tweet._json['id']
+        created_at = tweet._json['created_at']
+        epoch = int(
+            dt.strptime(
+                created_at, '%a %b %d %H:%M:%S +0000 %Y'
+            ).timestamp()
+        )
+
+        print(f'id: {id}, created_at: {created_at}, epoch: {epoch}')
+
+
+def get_user_timeline(api, sender_twitter_user, count):
+    """ This function prints the N (defined by count attribute) last retweets
+    from a specific user timeline.
+
+    Attributes:
+        :api (Obj): Tweepy API client object.
+        :sender_twitter_user (str): Sender twitter account name, without @.
+        :count (int):               Number of recent retweets  to search hidden
+                                    information.
+    """
+
+    log.debug(
+        f'Looking for retweets in "{sender_twitter_user}" user timeline.'
+    )
+    retweets = api.user_timeline(sender_twitter_user, count=count)
+
+    for tweet in reversed(retweets):
+        status = tweet._json['retweeted_status']['id']
+        created_at = tweet._json['retweeted_status']['created_at']
+
+        print(f'status: {status}, ceated_at: {created_at}')
+
+
+def retweet(api, id_or_status):
+    """ Just retweet a tweet by ID or status (both are valid).
+
+    Attributes:
+        :api (Obj):             Tweepy API client object.
+        :id_or_status (str):    ID from tweet to retweet.
+    """
+
+    api.retweet(id_or_status)
