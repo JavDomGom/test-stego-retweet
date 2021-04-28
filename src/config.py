@@ -9,6 +9,12 @@ LOG_FORMATTER = os.getenv(
     '%(asctime)-15s [%(levelname)s] %(funcName)s() %(message)s'
 )
 
+
+CHARSET = "abcdefghijklmnopqrstuvwxyz0123456789 '.,:?!/-+=<>$_*()@#|%&[]{}^"
+BITS_X_CHAR = 6
+M_FILE = "M.npy"
+N_BITS = 24
+
 # Set your credentials:
 TWITTER_CONSUMER_KEY = 'XXX'
 TWITTER_CONSUMER_SECRET = 'XXX'

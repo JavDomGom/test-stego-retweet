@@ -3,15 +3,15 @@
 import os
 import numpy as np
 
-N_BITS = 24
+from src.config import N_BITS, M_FILE
 
 def prepare_M(n_bits):
 
-    if os.path.isfile("M.npy"):
-        print("M.npy is already generated")
-        return np.load("M.npy")
+    if os.path.isfile(M_FILE):
+        print(f"{M_FILE} is already generated")
+        return np.load(M_FILE)
 
-    print("M.npy not found, generating ...")
+    print(f"{M_FILE} not found, generating ...")
     M=[]
     l=len(bin(2**n_bits-1)[2:])
     for i in range(1, 2**n_bits):
@@ -21,8 +21,7 @@ def prepare_M(n_bits):
 
     M=np.asarray(M, dtype=np.uint8).T
 
-    np.save("M.npy", M)
-    return M
+    np.save(M_FILE, M)
 
 
 if __name__ == "__main__":
