@@ -1,5 +1,5 @@
 from datetime import datetime as dt
-from src import app_logger, config
+from src import app_logger, twitter, codes
 
 log = app_logger.get_logger(__name__)
 
@@ -7,33 +7,26 @@ log = app_logger.get_logger(__name__)
 def main():
     log.info('Starting program.')
 
-    oauth = config.get_token()
-
-    # users = config.get_users(
-    #     oauth,
-    #     ['TwitterDev', 'TwitterAPI'],
-    #     ['created_at', 'name', 'description']
-    # )
-
-    tweets = config.get_tweets(
-        oauth,
-        ['1386398089108344832',
-         '1386398088365953026',
-         '1386398087904591873',
-         '1386398085929070594',
-         '1386398085077782532',
-         '1386398084603662336'],
-        ['created_at', 'text']
+    tweets = twitter.get_searched_tweets(
+        target='food',
+        since_id=12345678
     )
+    now_epoch = int(dt.now().timestamp())
+    code = codes.Code(now_epoch)
 
     for tweet in tweets:
-        created_at_epoch = dt.strptime(
-            tweet["created_at"], '%Y-%m-%dT%H:%M:%S.%fZ'
+        id = tweet._json['id']
+        created_at = tweet._json['created_at']
+        epoch = int(
+            dt.strptime(
+                created_at, '%a %b %d %H:%M:%S +0000 %Y'
+            ).timestamp()
         )
-        print(
-            f'id: {tweet["id"]}\tcreated_at: {tweet["created_at"]} ({created_at_epoch.timestamp()})'  # noqa: E501
-        )
-        # print(f'text: {tweet["text"]}')
+
+        print(f'id: {id}, created_at: {created_at}, epoch: {epoch}')
+
+        code.encode('Hola')
+        print(code.decode(epoch))
 
     log.info('Finishing program.')
 
