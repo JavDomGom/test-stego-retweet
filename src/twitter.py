@@ -77,11 +77,7 @@ def get_user_timeline(api, sender_twitter_user, count):
     )
     retweets = api.user_timeline(sender_twitter_user, count=count)
 
-    for tweet in reversed(retweets):
-        status = tweet._json['retweeted_status']['id']
-        created_at = tweet._json['retweeted_status']['created_at']
-
-        print(f'status: {status}, ceated_at: {created_at}')
+    return reversed(retweets)
 
 
 def retweet(api, id_or_status):
