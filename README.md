@@ -1,3 +1,8 @@
 # Test stego-retweet
 
-Testing...
+## Dependencies
+
+```bash
+~$ pip3 install tweepy
+~$ pip3 install twint
+```

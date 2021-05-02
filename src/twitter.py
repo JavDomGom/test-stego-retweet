@@ -1,9 +1,34 @@
 import tweepy
+import twint
 
-from datetime import datetime as dt
 from src import config, app_logger
 
 log = app_logger.get_logger(__name__)
+
+
+def get_tweets_list(target, lang, year, limit):
+    """ Returns a list of tweets according to the search parameters.
+
+    Attributes:
+        :target (str):  Search terms.
+        :lang (str):    Compatible language codes: https://github.com/twintproject/twint/wiki/Langauge-codes  # noqa: E501
+        :year (str):    Filter Tweets before the specified year.
+        :limit (int):   Number of Tweets to pull (Increments of 100).
+    """
+
+    log.info(f'Looking for {limit} tweets with target "{target}", lang "{lang}" and before "{year}".')  # noqa: E501
+
+    c = twint.Config()
+    c.Search = target
+    c.Lang = lang
+    c.Year = year
+    c.Limit = limit
+    c.Hide_output = True
+    c.Store_object = True
+
+    twint.run.Search(c)
+
+    return twint.output.tweets_list
 
 
 def get_api():
@@ -24,41 +49,19 @@ def get_api():
     )
 
 
-def search_tweets(api, target):
-    """ Returns a collection of relevant Tweets matching a specified query.
+def retweet(api, id):
+    """ Just retweet a tweet by ID.
 
     Attributes:
         :api (Obj): Tweepy API client object.
-        :target (str):      A UTF-8, URL-encoded search query of 500 characters
-                            max including  operators. Queries  may additionally
-                            be limited by complexity.
-        :since_id (int):    Returns results  with an ID  greater than (that is,
-                            more  recent  than)  the  specified  ID.  There are
-                            limits  to  the  number  of  Tweets  which  can  be
-                            accessed  through the API.  If the limit  of Tweets
-                            has  occured since the  since_id, the since_id will
-                            be forced to the oldest ID available.
+        :id (str):  ID from tweet to retweet.
     """
 
-    log.info(f'Looking for tweets with target "{target}".')
-
-    # Doc: https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/api-reference/get-search-tweets  # noqa: E501
-    for tweet in tweepy.Cursor(
-        api.search,
-        q=target,
-        lang='en',
-        result_type='recent',
-        include_entities=False
-    ).items(1):
-        id = tweet._json['id']
-        created_at = tweet._json['created_at']
-        epoch = int(
-            dt.strptime(
-                created_at, '%a %b %d %H:%M:%S +0000 %Y'
-            ).timestamp()
-        )
-
-        print(f'id: {id}, created_at: {created_at}, epoch: {epoch}')
+    try:
+        api.retweet(id)
+        log.info(f'Tweet with id "{id}" successfully retweeted!')
+    except Exception as e:
+        log.warning(e)
 
 
 def get_user_timeline(api, sender_twitter_user, count):
@@ -78,14 +81,3 @@ def get_user_timeline(api, sender_twitter_user, count):
     retweets = api.user_timeline(sender_twitter_user, count=count)
 
     return reversed(retweets)
-
-
-def retweet(api, id_or_status):
-    """ Just retweet a tweet by ID or status (both are valid).
-
-    Attributes:
-        :api (Obj):             Tweepy API client object.
-        :id_or_status (str):    ID from tweet to retweet.
-    """
-
-    api.retweet(id_or_status)
