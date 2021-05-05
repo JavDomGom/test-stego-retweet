@@ -81,3 +81,18 @@ def get_user_timeline(api, sender_twitter_user, count):
     retweets = api.user_timeline(sender_twitter_user, count=count)
 
     return reversed(retweets)
+
+
+def load_words(path):
+    """ Returns a list with all words in file splitted by line.
+
+    Attributes:
+        :path (str):    Path to file with words to load.
+    """
+
+    log.debug(f'Loading words from file "{path}".')
+
+    with open(path, 'r') as f:
+        w = f.read().splitlines()
+        return w
+    return []

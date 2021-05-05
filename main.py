@@ -7,6 +7,8 @@ log = app_logger.get_logger(__name__)
 def main():
     log.info('Starting program.')
 
+    words = twitter.load_words('db/words.txt')
+
     """
     1. Creamos una lista de 1000 tweets que contengan el target "food", en
     inglés (en) y que sean hasta el año 2015.
