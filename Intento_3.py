@@ -23,7 +23,13 @@ def main():
         photos = len(tw.photos)  # El valor es una lista, y puede estar vacía.
         retweet = tw.retweet  # Bool
         tweet = tw.tweet
-        print(f'photos: {photos}, retweet: {retweet}, tweet: {tweet}')
+        print(
+            {
+                'photos': photos,
+                'retweet': retweet,
+                'tweet': tweet
+            }
+        )
         input('\nPress any key...\n')
 
 

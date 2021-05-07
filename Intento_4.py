@@ -1,8 +1,10 @@
 import json
+import os
 from datetime import datetime as dt
 from src import app_logger, twitter, codes
 
 log = app_logger.get_logger(__name__)
+log.propagate = False
 
 
 def main():
@@ -18,8 +20,9 @@ def main():
     tweets = twitter.get_tweets_list('food', 'en', '2015', 100)
 
     """
-    2. Por cada tweet comprobamos si contiene una o dos palabras, pero no más,
-    de nuestro set de palabras.
+    2. Por cada tweet comprobamos si contiene una y solo una palabra de nuestro
+    set de palabras. Contamos el número de carácteres que tiene y realizamos un
+    módulo N.
     """
 
     for tw in tweets:
@@ -28,17 +31,21 @@ def main():
         for w in set(tweet.split()):
             if w.isalpha() and len(w) >= 4 and len(w) <= 18 and w in words:
                 match += 1
-            if match == 3:
+            if match == 2:
                 break
 
-        if match in {1, 2}:
+        if match == 1:
+            nchars = len(tweet)
             print(
                 {
-                    'match': match,
-                    'tweet': tweet
+                    'nchars': nchars,
+                    'mod_2': nchars % 2,
+                    'mod_4': nchars % 4,
+                    'mod_8': nchars % 8,
+                    'mod_16': nchars % 16
                 }
             )
-            log.info(f'Tweet with ID "{tw.id}" optimal to work.')
+
             input('\nPress any key...\n')
 
 

@@ -32,7 +32,12 @@ def main():
                 break
 
         if match == 1:
-            print(f'match: {match}, tweet: {tweet}')
+            print(
+                {
+                    'match': match,
+                    'tweet': tweet
+                }
+            )
             log.info(f'Tweet with ID "{tw.id}" optimal to work.')
             input('\nPress any key...\n')
 
